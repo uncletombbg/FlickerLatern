@@ -1,4 +1,5 @@
 #include <avr/io.h>
+#include <util/delay.h>
 
 /*
 * This demonstrate how to use the avr_mcu_section.h file
@@ -17,7 +18,29 @@ const struct avr_mmcu_vcd_trace_t _mytrace[] _MMCU_ = {
 // { AVR_MCU_VCD_SYMBOL("OCR0A"), .what = (void*)&OCR0A, },
 };
 
+
+#define THREASHOLD 50
+
+static uint8_t calculate_lcg(void) {
+    static uint8_t state;
+    state = (5 * state) + 129;
+    return state;
+}
+
 int main(void)
 {
-    return 1;
+    // Setup PIN direction ATTINY only has PORTB
+    DDRB = (1<< DDB0);
+    while(1)
+    {
+        uint8_t next_value = calculate_lcg();
+        if (next_value > THREASHOLD)
+        {
+            PORTB |= (1 << PB0);
+        } else {
+            PORTB &= ~(1 << PB0);
+        }
+      _delay_ms(50);
+    }
+    return -1;
 }
